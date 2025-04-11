@@ -5,7 +5,7 @@
 - Download the script into a directory of your choice
 - The file **property-mapping.js** contains the mapping of Tailwind 3 properties to Tailwind 4 properties. You can modify this file to add or remove properties as needed.
 - Run the script using Node.js: `node ConvertToCSs <path_to_tailwind3_config.js>`
-- The script will generate a `<theme-name.css>` file in a new folder named Outputs in the same dicrectory.
+- The script will generate a `<theme-name.css>` file in the folder named Outputs in the same dicrectory.
 
 - The generated CSS file will contain the Tailwind 4 CSS classes based on the Tailwind 3 config.js file.
 
