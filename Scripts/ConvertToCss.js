@@ -39,39 +39,25 @@ function objectToCssVariables(obj, prefix = '') {
         // Handle fontSize specifically
         const [fontSize, options] = value;
         const lineHeight = options?.lineHeight || '1';
-        cssVariables += `  --${variableName}: ${fontSize};\n`;
-        cssVariables += `  --${variableName}--line-height: calc(${lineHeight.replace('rem', '')} / ${fontSize.replace('rem', '')});\n`;
-      } else {
+        cssVariables += `    --${variableName}: ${fontSize};\n`;
+        cssVariables += `    --${variableName}--line-height: calc(${lineHeight.replace('rem', '')} / ${fontSize.replace('rem', '')});\n`;
+      } else if (mappedPrefix === 'aspect-ratio') {
+        // Handle aspectRatio specifically - meaning ignore the value
+      }
+      else {
         // Default case
         const formattedValue = Array.isArray(value) ? value[0] : value;
-        cssVariables += `  --${variableName}: ${formattedValue};\n`;
+        cssVariables += `    --${variableName}: ${formattedValue};\n`;
       }
     }
   }
   return cssVariables;
 }
 
-// Convert keyframes to CSS
-function keyframesToCss(keyframes) {
-  let cssKeyframes = '';
-  for (const [name, steps] of Object.entries(keyframes)) {
-    cssKeyframes += `@keyframes ${name} {\n`;
-    for (const [step, properties] of Object.entries(steps)) {
-      cssKeyframes += `  ${step} {\n`;
-      for (const [prop, value] of Object.entries(properties)) {
-        cssKeyframes += `    ${prop}: ${value};\n`;
-      }
-      cssKeyframes += `  }\n`;
-    }
-    cssKeyframes += `}\n`;
-  }
-  return cssKeyframes;
-}
-
 // Generate the CSS content
 function generateCss(config) {
   const className = config.selectors[0]; // Use the first selector as the class name
-  let cssContent = `${className} {\n`;
+  let cssContent = `@layer components {\n  ${className} {\n`;
 
   // Convert extend properties to CSS variables
   if (config.extend) {
@@ -84,19 +70,19 @@ function generateCss(config) {
   // Add keyframes inside the class
   if (config.keyframes) {
     for (const [name, steps] of Object.entries(config.keyframes)) {
-      cssContent += `  @keyframes ${name} {\n`;
+      cssContent += `    @keyframes ${name} {\n`;
       for (const [step, properties] of Object.entries(steps)) {
-        cssContent += `    ${step} {\n`;
+        cssContent += `      ${step} {\n`;
         for (const [prop, value] of Object.entries(properties)) {
-          cssContent += `      ${prop}: ${value};\n`;
+          cssContent += `        ${prop}: ${value};\n`;
         }
-        cssContent += `    }\n`;
+        cssContent += `      }\n`;
       }
-      cssContent += `  }\n`;
+      cssContent += `    }\n`;
     }
   }
 
-  cssContent += '}\n';
+  cssContent += '  }\n}\n';
 
   return cssContent;
 }

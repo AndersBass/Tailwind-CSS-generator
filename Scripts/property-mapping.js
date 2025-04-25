@@ -15,6 +15,7 @@ export const figmaToTailwind = new Map([
   ['zIndex', 'z-index'],
   ['aspectRatio', 'aspect-ratio'],
   ['backgroundColor', 'color'],
+  ['backgroundImage', 'background-image'],
   ['textColor', 'text'],
   ['borderColor', 'color'],
   ['borderWidth', 'border-width-width'], // this is stupid, but Tailwind references border-width as border, and we need it to be border-width, or else it will clash with other border properties
