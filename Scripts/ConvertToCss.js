@@ -54,10 +54,54 @@ function objectToCssVariables(obj, prefix = '') {
   return cssVariables;
 }
 
+// Extract custom variants from plugins
+function extractCustomVariants(config) {
+  let customVariants = '';
+
+  console.log('Extracting custom variants from plugins...');
+  
+  if (config.plugins && Array.isArray(config.plugins)) {
+    config.plugins.forEach(plugin => {
+      try {
+        // Handle different plugin formats
+        let pluginStr = '';
+        
+        if (typeof plugin === 'function') {
+          pluginStr = plugin.toString();
+        } else if (plugin && typeof plugin.handler === 'function') {
+          pluginStr = plugin.handler.toString();
+        } else if (plugin && typeof plugin === 'object') {
+          // Try to stringify the object for inspection
+          pluginStr = JSON.stringify(plugin);
+        }
+        
+        // If we have a plugin function that includes addVariant
+        if (pluginStr && pluginStr.includes('addVariant')) {
+          // Extract addVariant calls using regex
+          const addVariantRegex = /addVariant\s*\(\s*['"]([^'"]+)['"]\s*,\s*(['"][^'"]+['"]|['"]([^'"]+)['"])\s*\)/g;
+          let match;
+          
+          while ((match = addVariantRegex.exec(pluginStr)) !== null) {
+            const variantName = match[1];
+            const selector = match[2];
+            customVariants += `@custom-variant ${variantName} (${selector});\n`;
+          }
+        }
+      } catch (error) {
+        console.warn('Error processing plugin:', error.message);
+      }
+    });
+  }
+  
+  return customVariants;
+}
+
 // Generate the CSS content
 function generateCss(config) {
-  const className = config.selectors[0]; // Use the first selector as the class name
-  let cssContent = `@layer components {\n  ${className} {\n`;
+  let cssContent = '';
+  
+  const className = config.selectors?.[0] || '.theme'; // Use the first selector as the class name or default
+  cssContent += `@layer components {\n  ${className} {\n`;
 
   // Convert extend properties to CSS variables
   if (config.extend) {
@@ -83,6 +127,12 @@ function generateCss(config) {
   }
 
   cssContent += '  }\n}\n';
+
+  // Extract custom variants
+  const customVariants = extractCustomVariants(config);
+  if (customVariants) {
+    cssContent += '\n' + customVariants + '\n';
+  }
 
   return cssContent;
 }
