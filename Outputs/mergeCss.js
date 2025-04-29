@@ -6,7 +6,6 @@ const baseFilePath = './theme-base.css';
 const themeFilePaths = [
   './theme-casino.css',
   './theme-klublotto.css',
-  './theme-kluboddset.css',
   './theme-oddset.css',
   './theme-numbergames.css',
   './theme-subscriptions.css',
@@ -57,7 +56,15 @@ themeFilePaths.forEach(themePath => {
 
 // Combine new variables
 const combinedVars = Array.from(baseVarsMap.values()).concat(Array.from(allThemeVars.values()));
-const newThemeBlock = `@theme {\n  ${combinedVars.join('\n  ')}\n}`;
+
+const sortedVars = combinedVars.sort((a, b) => {
+  const nameA = a.split(':')[0].trim();
+  const nameB = b.split(':')[0].trim();
+  return nameA.localeCompare(nameB);
+});
+
+
+const newThemeBlock = `@theme {\n  ${sortedVars.join('\n  ')}\n}`;
 
 // Replace the old @theme block in the base content
 const updatedBaseContent = baseContent.replace(themeBlockRegex, newThemeBlock);
