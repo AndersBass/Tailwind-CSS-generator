@@ -40,11 +40,13 @@ function objectToCssVariables(obj, prefix = '') {
         const [fontSize, options] = value;
         const lineHeight = options?.lineHeight || '1';
         cssVariables += `    --${variableName}: ${fontSize};\n`;
-        cssVariables += `    --${variableName}--line-height: calc(${lineHeight.replace('rem', '')} / ${fontSize.replace('rem', '')});\n`;
+        cssVariables += `    --${variableName}--line-height: ${lineHeight};\n`;
       } else if (mappedPrefix === 'aspect-ratio') {
         // Handle aspectRatio specifically - meaning ignore the value
-      }
-      else {
+      } else if (mappedPrefix === 'animate') {
+        // Handle animation specifically
+        cssVariables += `    --${variableName}: ${value};\n`;
+      } else {
         // Default case
         const formattedValue = Array.isArray(value) ? value[0] : value;
         cssVariables += `    --${variableName}: ${formattedValue};\n`;
@@ -107,7 +109,22 @@ function generateCss(config) {
   if (config.extend) {
     for (const [section, values] of Object.entries(config.extend)) {
       const prefix = mapPropertyName(section); // Map the section name
-      cssContent += objectToCssVariables(values, prefix);
+      
+      // Special handling for animation
+      if (section === 'animation' && typeof values === 'object') {
+        for (const [animName, animValue] of Object.entries(values)) {
+          cssContent += `    --animate-${animName}: ${animValue};\n`;
+        }
+      } else {
+        cssContent += objectToCssVariables(values, prefix);
+      }
+    }
+  }
+
+  // Handle top-level animation config
+  if (config.animation && typeof config.animation === 'object') {
+    for (const [animName, animValue] of Object.entries(config.animation)) {
+      cssContent += `    --animate-${animName}: ${animValue};\n`;
     }
   }
 
